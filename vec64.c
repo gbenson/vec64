@@ -38,7 +38,7 @@ indexify_base64(PyObject *self, PyObject *args)
     char *str = NULL;
     Py_ssize_t size;
 
-    if (!PyArg_ParseTuple(args, "es#", encoding, &str, &size)) {
+    if (!PyArg_ParseTuple(args, "et#", encoding, &str, &size)) {
         return NULL;
     }
 

@@ -1,6 +1,6 @@
 [project]
 name = "vec64"
-version = "0.0.1"
+version = "0.0.2"
 authors = [{ name = "Gary Benson", email = "gary@gbenson.net" }]
 description = "C extension functions to make DOM tokenizers faster"
 readme = "README.md"
