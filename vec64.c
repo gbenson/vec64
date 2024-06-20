@@ -1,17 +1,30 @@
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 
-PyDoc_STRVAR(indexify_base64__doc__,
+PyDoc_STRVAR(base64_symbol_indexes__doc__,
 "Transform Base64 alphabet symbols into their RFC 4648 integer values.\n"
 "\n"
-"The result is returned as a bytes object, with each byte containing the\n"
-"value of one symbol in the input; `'hello'`, for example, indexifies as\n"
-"`bytes((33, 30, 37, 37, 40))`.  Processing stops if a non-Base64 symbol\n"
-"is encountered, so indexifying `'hello world'` returns the same 5-byte\n"
-"sequence as indexifying `'hello'` did, since ASCII space is not a symbol\n"
-"in the Base64 alphabet.");
+"Given a string or bytes-like object, return a bytes object in which\n"
+"each byte contains the value of the corresponding symbol from in the\n"
+"input.  Processing stops at the first non-Base64 symbol or when the\n"
+"end of the input is reached, whichever is sooner.   Up to two padding\n"
+"characters (`'='`) will be transformed into zero values (`b'\\0'`) at\n"
+"the end of the input.\n"
+"\n"
+"Usage examples:\n"
+"\n"
+"```python\n"
+">>> list(base64_symbol_indexes('hello'))\n"
+"[33, 30, 37, 37, 40]\n"
+">>> list(base64_symbol_indexes('hello world'))\n"
+"[33, 30, 37, 37, 40]        # processing stopped at the ' '\n"
+">>> list(base64_symbol_indexes('hello='))\n"
+"[33, 30, 37, 37, 40, 0]     # the '=' transforms to '\\0'\n"
+">>> list(base64_symbol_indexes('hello==='))\n"
+"[33, 30, 37, 37, 40, 0, 0]  # processing stopped after the second '='\n"
+"```\n");
 
-static const char b64_symbol_indexes[] = {
+static const char symbol_index_table[] = {
     -1, -1, -1, -1,   -1, -1, -1, -1,   -1, -1, -1, -1,   -1, -1, -1, -1,
     -1, -1, -1, -1,   -1, -1, -1, -1,   -1, -1, -1, -1,   -1, -1, -1, -1,
     -1, -1, -1, -1,   -1, -1, -1, -1,   -1, -1, -1, 62,   -1, -1, -1, 63,
@@ -32,7 +45,7 @@ static const char b64_symbol_indexes[] = {
 };
 
 static PyObject *
-indexify_base64(PyObject *self, PyObject *args)
+base64_symbol_indexes(PyObject *self, PyObject *args)
 {
     const char *encoding = NULL;
     char *str = NULL;
@@ -46,9 +59,17 @@ indexify_base64(PyObject *self, PyObject *args)
     unsigned char *limit = buf + size;
     for (unsigned char *p = buf; p < limit; p++) {
         unsigned char c = *p;
-        unsigned char i = b64_symbol_indexes[c];
+        unsigned char i = symbol_index_table[c];
 
         if ((i & ~63) != 0) {
+            // Process up to two padding characters
+            if (c == '=') {
+                *(p++) = 0;
+
+                if (p < limit && *p == '=')
+                    *(p++) = 0;
+            }
+
             size = p - buf;
             break;
         }
@@ -63,7 +84,10 @@ indexify_base64(PyObject *self, PyObject *args)
 }
 
 static PyMethodDef vec64_methods[] = {
-    {"indexify_base64", indexify_base64, METH_VARARGS, indexify_base64__doc__},
+    {"base64_symbol_indexes",
+     base64_symbol_indexes,
+     METH_VARARGS,
+     base64_symbol_indexes__doc__},
     {NULL, NULL, 0, NULL}
 };
 
