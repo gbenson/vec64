@@ -1,6 +1,14 @@
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 
+#if __GNUC__ >= 3
+# define unlikely(cond)   __builtin_expect(!!(cond), 0)
+# define likely(cond)     __builtin_expect(!!(cond), 1)
+#else
+# define unlikely(cond)   (cond)
+# define likely(cond)     (cond)
+#endif
+
 PyDoc_STRVAR(base64_symbol_indexes__doc__,
 "Transform Base64 alphabet symbols into their RFC 4648 integer values.\n"
 "\n"
@@ -61,7 +69,7 @@ base64_symbol_indexes(PyObject *self, PyObject *args)
         unsigned char c = *p;
         unsigned char i = symbol_index_table[c];
 
-        if ((i & ~63) != 0) {
+        if (unlikely((i & ~63) != 0)) {
             // Process up to two padding characters
             if (c == '=') {
                 *(p++) = 0;
