@@ -1,6 +1,6 @@
 [project]
 name = "vec64"
-version = "0.0.3"
+version = "0.0.4"
 authors = [{ name = "Gary Benson", email = "gary@gbenson.net" }]
 description = "C extension functions to make DOM tokenizers faster"
 readme = "README.md"
@@ -19,6 +19,11 @@ classifiers = [
 [project.urls]
 Homepage = "https://github.com/gbenson/vec64"
 Source = "https://github.com/gbenson/vec64"
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
 
 [build-system]
 requires = ["setuptools>=61.0"]
