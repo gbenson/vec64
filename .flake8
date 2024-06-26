@@ -1,0 +1,7 @@
+[flake8]
+exclude = .git,__pycache__,venv*,.venv*,build,dist,.local,.#*,#*,*~
+inline-quotes = "
+extend-ignore = E265
+per-file-ignores =
+    # imported but unused
+    src/vec64.py: F401

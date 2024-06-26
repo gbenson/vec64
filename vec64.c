@@ -108,7 +108,7 @@ static struct PyModuleDef vec64_module = {
 };
 
 PyMODINIT_FUNC
-PyInit_vec64(void)
+PyInit__vec64(void)
 {
     return PyModule_Create(&vec64_module);
 }

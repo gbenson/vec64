@@ -22,6 +22,7 @@ Source = "https://github.com/gbenson/vec64"
 
 [project.optional-dependencies]
 dev = [
+    "flake8",
     "pytest",
 ]
 
