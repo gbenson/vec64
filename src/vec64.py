@@ -45,15 +45,15 @@ class CharType(Enum):
     BASE64 = _RT_BASE64    # Everything!
 
 
-Range = namedtuple("Range", ("start", "limit", "ctype"))
+Span = namedtuple("Span", ("start", "limit", "ctype"))
 
 
 def split(
         sequence: bytes,
         sep: Optional[CharType] = CharType.PUNCT,
         maxsplit: Optional[int] = -1,
-) -> list[Range]:
-    """Return a list of the type ranges in the input sequence.
+) -> list[Span]:
+    """Return a list of typed ranges in the input sequence.
 
     :param sequence:
         A bytes-like object of Base64 alphabet symbol indexes, as
@@ -66,6 +66,6 @@ def split(
     """
     sep = getattr(sep, "value", -1)
     return [
-        Range(start, limit, CharType(ctype))
+        Span(start, limit, CharType(ctype))
         for start, limit, ctype in _split(sequence, maxsplit, sep)
     ]

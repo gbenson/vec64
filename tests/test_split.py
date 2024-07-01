@@ -12,21 +12,21 @@ def test_all_transitions(input_text):
     """Any input sequences comprising one of each character type should
     come back as base64.  This ought to flex every possible transition.
     """
-    ranges = split(base64_symbol_indexes(input_text), sep=-1)
+    spans = split(base64_symbol_indexes(input_text), sep=-1)
 
-    assert len(ranges) in range(2, 6)
-    assert ranges[-1] == (0, 6, CT.BASE64)
-    assert not any(r.start != 0 for r in ranges)
-    assert not any(r.ctype is CT.BASE64 for r in ranges[:-1])
+    assert len(spans) in range(2, 6)
+    assert spans[-1] == (0, 6, CT.BASE64)
+    assert not any(span.start != 0 for span in spans)
+    assert not any(span.ctype is CT.BASE64 for span in spans[:-1])
 
     if (puncpos := input_text.find("+")) < 2:
-        assert len(ranges) == 2
-        assert ranges[0].limit == 1
+        assert len(spans) == 2
+        assert spans[0].limit == 1
         return
 
     assert 2 <= puncpos < 6
-    assert len(ranges) >= min(puncpos, 3)
-    assert len(ranges) <= puncpos + 1
+    assert len(spans) >= min(puncpos, 3)
+    assert len(spans) <= puncpos + 1
 
 
 @pytest.mark.parametrize(
