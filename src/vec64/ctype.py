@@ -1,6 +1,4 @@
-from collections import namedtuple
 from enum import Enum
-from typing import Optional
 
 from _vec64 import (
     _RT_ALNUM,
@@ -18,8 +16,6 @@ from _vec64 import (
     _RT_UPPER_ALNUM,
     _RT_UPPER_ALPHAHEX,
     _RT_UPPERHEX,
-    base64_symbol_indexes,
-    _split,
 )
 
 
@@ -43,29 +39,3 @@ class CharType(Enum):
     DECIMAL = _RT_DECIMAL  # 0-9
     PUNCT = _RT_PUNCT      # '+' and '/'
     BASE64 = _RT_BASE64    # Everything!
-
-
-Span = namedtuple("Span", ("start", "limit", "ctype"))
-
-
-def split(
-        sequence: bytes,
-        sep: Optional[CharType] = CharType.PUNCT,
-        maxsplit: Optional[int] = -1,
-) -> list[Span]:
-    """Return a list of typed ranges in the input sequence.
-
-    :param sequence:
-        A bytes-like object of Base64 alphabet symbol indexes, as
-        returned by `base64_symbol_indexes`.
-    :param sep:
-        The character type used to split the string.
-    :param maxsplit:
-        Maximim number of splits, starting from the left.  Values
-        less than one mean no limit.
-    """
-    sep = getattr(sep, "value", -1)
-    return [
-        Span(start, limit, CharType(ctype))
-        for start, limit, ctype in _split(sequence, maxsplit, sep)
-    ]

@@ -4,4 +4,4 @@ inline-quotes = "
 extend-ignore = E265
 per-file-ignores =
     # imported but unused
-    src/vec64.py: F401
+    src/**/__init__.py: F401
