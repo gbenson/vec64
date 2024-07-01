@@ -2,7 +2,7 @@ from itertools import permutations
 
 import pytest
 
-from vec64 import base64_symbol_indexes, split, CharType as CT
+from vec64 import base64_symbol_indexes, split, CT
 
 
 @pytest.mark.parametrize(

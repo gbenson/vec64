@@ -39,3 +39,6 @@ class CharType(Enum):
     DECIMAL = _RT_DECIMAL  # 0-9
     PUNCT = _RT_PUNCT      # '+' and '/'
     BASE64 = _RT_BASE64    # Everything!
+
+
+CT = CharType
