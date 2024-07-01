@@ -23,7 +23,7 @@ from _vec64 import (
 )
 
 
-class RangeType(Enum):
+class CharType(Enum):
     ALPHA = _RT_ALPHA  # A-Za-z
     UPPER = _RT_UPPER  # A-Z
     LOWER = _RT_LOWER  # a-z
@@ -45,12 +45,12 @@ class RangeType(Enum):
     BASE64 = _RT_BASE64    # Everything!
 
 
-Range = namedtuple("Range", ("start", "limit", "kind"))
+Range = namedtuple("Range", ("start", "limit", "ctype"))
 
 
 def split(
         sequence: bytes,
-        sep: Optional[RangeType] = RangeType.PUNCT,
+        sep: Optional[CharType] = CharType.PUNCT,
         maxsplit: Optional[int] = -1,
 ) -> list[Range]:
     """Return a list of the type ranges in the input sequence.
@@ -66,6 +66,6 @@ def split(
     """
     sep = getattr(sep, "value", -1)
     return [
-        Range(start, limit, RangeType(kind))
-        for start, limit, kind in _split(sequence, maxsplit, sep)
+        Range(start, limit, CharType(ctype))
+        for start, limit, ctype in _split(sequence, maxsplit, sep)
     ]

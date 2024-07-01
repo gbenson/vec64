@@ -84,10 +84,10 @@ import _vec64
      ("ALNUM",          "PUNCT",          "BASE64"),
      ))
 def test_combination(a, b, expect_result):
-    """Ensure range type constants combine as they should.
+    """Ensure character type constants combine as they should.
     """
     a, b, expect_result = [
-        getattr(_vec64, f"_RT_{range_type}")
-        for range_type in (a, b, expect_result)
+        getattr(_vec64, f"_RT_{ctype}")
+        for ctype in (a, b, expect_result)
     ]
     assert (a & b) == expect_result
