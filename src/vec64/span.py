@@ -1,4 +1,5 @@
 from collections import namedtuple
+from functools import cached_property
 
 from .ctype import CTypeInfo, ctype_info
 
@@ -14,8 +15,8 @@ class Span(namedtuple("_Span", ("start", "limit", "ctype"))):
         """
         return self.limit - self.start
 
-    @property
+    @cached_property
     def probability(self) -> float:
-        """The probability a span of this length would have this ctype.
+        """The probability of a span of this length having this ctype.
         """
         return self.ctype_info.probability(self.length)
