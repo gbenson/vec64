@@ -1,4 +1,10 @@
-from _vec64 import base64_symbol_indexes
 from .ctype import CharType, CT
 from .span import Span
-from .split import split
+from .wrappers import base64_symbol_indexes, split
+
+__all__ = [
+    "CharType",
+    "Span",
+    "base64_symbol_indexes",
+    "split",
+]
