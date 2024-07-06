@@ -1,10 +1,17 @@
+from deprecated import deprecated
+
 from .ctype import CharType, CT
 from .span import Span
-from .wrappers import base64_symbol_indexes, split
+from .wrappers import split, vectorize
 
 __all__ = [
     "CharType",
     "Span",
-    "base64_symbol_indexes",
     "split",
+    "vectorize",
 ]
+
+
+@deprecated(reason="'base64_symbol_indexes' has been renamed as 'vectorize'")
+def base64_symbol_indexes(*args, **kwargs):
+    return vectorize(*args, **kwargs)
