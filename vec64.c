@@ -10,7 +10,7 @@
 # define likely(cond)     (cond)
 #endif
 
-PyDoc_STRVAR(base64_symbol_indexes__doc__,
+PyDoc_STRVAR(vectorize__doc__,
 "Transform Base64 alphabet symbols into their RFC 4648 integer values.\n"
 "\n"
 "Given a string or bytes-like object, return a bytes object in which\n"
@@ -23,13 +23,13 @@ PyDoc_STRVAR(base64_symbol_indexes__doc__,
 "Usage examples:\n"
 "\n"
 "```python\n"
-">>> list(base64_symbol_indexes('hello'))\n"
+">>> list(vectorize('hello'))\n"
 "[33, 30, 37, 37, 40]\n"
-">>> list(base64_symbol_indexes('hello world'))\n"
+">>> list(vectorize('hello world'))\n"
 "[33, 30, 37, 37, 40]        # processing stopped at the ' '\n"
-">>> list(base64_symbol_indexes('hello='))\n"
+">>> list(vectorize('hello='))\n"
 "[33, 30, 37, 37, 40, 0]     # the '=' transforms to '\\0'\n"
-">>> list(base64_symbol_indexes('hello==='))\n"
+">>> list(vectorize('hello==='))\n"
 "[33, 30, 37, 37, 40, 0, 0]  # processing stopped after the second '='\n"
 "```\n");
 
@@ -54,7 +54,7 @@ static const char symbol_index_table[] = {
 };
 
 static PyObject *
-base64_symbol_indexes(PyObject *self, PyObject *args)
+vectorize(PyObject *self, PyObject *args)
 {
     const char *encoding = NULL;
     char *str = NULL;
@@ -174,10 +174,10 @@ PyDoc_STRVAR(vec64_split__doc__,
 "Split a sequence of Base64 symbol indexes by character type.\n"
 "\n"
 "Given a bytes-like object of Base64 alphabet symbol indexes as\n"
-"returned by `base64_symbol_indexes`, return a list of 3-tuples\n"
-"describing the ranges of character types found.  Each returned\n"
-"tuple comprises start and limit indexes into the input sequence\n"
-"describing the characteristics all symbols in the range share.\n");
+"returned by `vectorize`, return a list of 3-tuples describing the\n"
+"ranges of character types found.  Each returned tuple comprises\n"
+"start and limit indexes into the input sequence describing the\n"
+"characteristics all symbols in the range share.\n");
 
 static PyObject *
 vec64_split(PyObject *self, PyObject *args)
@@ -327,10 +327,10 @@ error:
 }
 
 static PyMethodDef vec64_methods[] = {
-    {"base64_symbol_indexes",
-     base64_symbol_indexes,
+    {"vectorize",
+     vectorize,
      METH_VARARGS,
-     base64_symbol_indexes__doc__},
+     vectorize__doc__},
     {"_split",
      vec64_split,
      METH_VARARGS,

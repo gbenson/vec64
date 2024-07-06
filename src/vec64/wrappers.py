@@ -1,18 +1,18 @@
 from typing import Optional
 
-from _vec64 import _split, base64_symbol_indexes as _base64_symbol_indexes
+from _vec64 import _split, vectorize
 from .ctype import CharType, CT
 from .span import Span
 
 
 def base64_symbol_indexes(text: str, errors: str = "replace") -> bytes:
     try:
-        return _base64_symbol_indexes(text)
+        return vectorize(text)
     except UnicodeEncodeError:
-        return _base64_symbol_indexes(text.encode(errors=errors))
+        return vectorize(text.encode(errors=errors))
 
 
-base64_symbol_indexes.__doc__ = _base64_symbol_indexes.__doc__
+base64_symbol_indexes.__doc__ = vectorize.__doc__
 
 
 def split(
