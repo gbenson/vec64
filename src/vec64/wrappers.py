@@ -18,7 +18,7 @@ base64_symbol_indexes.__doc__ = _base64_symbol_indexes.__doc__
 def split(
         sequence: bytes,
         sep: Optional[CharType] = CT.PUNCT,
-        maxsplit: Optional[int] = -1,
+        maxsplit: int = -1,
 ) -> list[Span]:
     """Return a list of typed ranges in the input sequence.
 
