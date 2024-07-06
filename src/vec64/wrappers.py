@@ -5,11 +5,17 @@ from .ctype import CharType, CT
 from .span import Span
 
 
-def base64_symbol_indexes(text: str, errors: str = "replace") -> bytes:
+def base64_symbol_indexes(
+        s: bytes | bytearray | str,
+        *,
+        errors: str = "replace",
+        pad_with: int = 64,
+) -> bytes:
+    kwargs = {"pad_with": pad_with}
     try:
-        return vectorize(text)
+        return vectorize(s, **kwargs)
     except UnicodeEncodeError:
-        return vectorize(text.encode(errors=errors))
+        return vectorize(s.encode(errors=errors), **kwargs)
 
 
 base64_symbol_indexes.__doc__ = vectorize.__doc__
@@ -18,7 +24,7 @@ base64_symbol_indexes.__doc__ = vectorize.__doc__
 def split(
         sequence: bytes,
         sep: Optional[CharType] = CT.PUNCT,
-        maxsplit: Optional[int] = -1,
+        maxsplit: int = -1,
 ) -> list[Span]:
     """Return a list of typed ranges in the input sequence.
 

@@ -13,12 +13,12 @@
 PyDoc_STRVAR(vectorize__doc__,
 "Transform Base64 alphabet symbols into their RFC 4648 integer values.\n"
 "\n"
-"Given a string or bytes-like object, return a bytes object in which\n"
-"each byte contains the value of the corresponding symbol from in the\n"
-"input.  Processing stops at the first non-Base64 symbol or when the\n"
-"end of the input is reached, whichever is sooner.   Up to two padding\n"
-"characters (`'='`) will be transformed into zero values (`b'\\0'`) at\n"
-"the end of the input.\n"
+"Transform the Base64 encoded string or bytes-like object `s` into a\n"
+"bytes object in which each byte contains the RFC 4648 integer value\n"
+"of the corresponding symbol from in the input.  Processing stops at\n"
+"the first non-Base64 symbol or when the end of the input is reached,\n"
+"whichever is sooner.  Up to two padding characters (`'='`) at the end\n"
+"of the input are transformed into the value specified by `pad_with`\n"
 "\n"
 "Usage examples:\n"
 "\n"
@@ -27,17 +27,23 @@ PyDoc_STRVAR(vectorize__doc__,
 "[33, 30, 37, 37, 40]\n"
 ">>> list(vectorize('hello world'))\n"
 "[33, 30, 37, 37, 40]        # processing stopped at the ' '\n"
-">>> list(vectorize('hello='))\n"
-"[33, 30, 37, 37, 40, 0]     # the '=' transforms to '\\0'\n"
-">>> list(vectorize('hello==='))\n"
+">>> list(vectorize('hello=', pad_with=64))\n"
+"[33, 30, 37, 37, 40, 64]    # the '=' was transformed to `chr(64)`\n"
+">>> list(vectorize('hello===', pad_with=64))\n"
 "[33, 30, 37, 37, 40, 0, 0]  # processing stopped after the second '='\n"
 "```\n");
+
+static char *vectorize_keywords[] = {
+    "s",
+    "pad_with",
+    NULL,
+};
 
 static const char symbol_index_table[] = {
     -1, -1, -1, -1,   -1, -1, -1, -1,   -1, -1, -1, -1,   -1, -1, -1, -1,
     -1, -1, -1, -1,   -1, -1, -1, -1,   -1, -1, -1, -1,   -1, -1, -1, -1,
     -1, -1, -1, -1,   -1, -1, -1, -1,   -1, -1, -1, 62,   -1, -1, -1, 63,
-    52, 53, 54, 55,   56, 57, 58, 59,   60, 61, -1, -1,   -1, 64, -1, -1,
+    52, 53, 54, 55,   56, 57, 58, 59,   60, 61, -1, -1,   -1, -1, -1, -1,
     -1,  0,  1,  2,    3,  4,  5,  6,    7,  8,  9, 10,   11, 12, 13, 14,
     15, 16, 17, 18,   19, 20, 21, 22,   23, 24, 25, -1,   -1, -1, -1, -1,
     -1, 26, 27, 28,   29, 30, 31, 32,   33, 34, 35, 36,   37, 38, 39, 40,
@@ -54,13 +60,19 @@ static const char symbol_index_table[] = {
 };
 
 static PyObject *
-vectorize(PyObject *self, PyObject *args)
+vectorize(PyObject *self, PyObject *args, PyObject *kwargs)
 {
     const char *encoding = NULL;
     char *str = NULL;
     Py_ssize_t size;
+    unsigned char pad_with = 0;
 
-    if (!PyArg_ParseTuple(args, "et#", encoding, &str, &size)) {
+    if (!PyArg_ParseTupleAndKeywords(
+            args, kwargs,
+            "et#|$b",
+            vectorize_keywords,
+            encoding, &str, &size,
+            &pad_with)) {
         return NULL;
     }
 
@@ -73,10 +85,14 @@ vectorize(PyObject *self, PyObject *args)
         if (unlikely((i & ~63) != 0)) {
             // Process up to two padding characters
             if (c == '=') {
-                *(p++) = 64;
+                *(p++) = pad_with;
 
-                if (p < limit && *p == '=')
-                    *(p++) = 64;
+                // PyArg_ParseTuple* returns a NUL-terminated buffer for
+                // "et#" so we don't need a size-check here: if the '='
+                // we just read was the end of the input then this next
+                // *p reads the trailing NUL.
+                if (*p == '=')
+                    *(p++) = pad_with;
             }
 
             size = p - buf;
@@ -173,11 +189,11 @@ static const symbol_type_t symbol_type_table[] = {
 PyDoc_STRVAR(vec64_split__doc__,
 "Split a sequence of Base64 symbol indexes by character type.\n"
 "\n"
-"Given a bytes-like object of Base64 alphabet symbol indexes as\n"
-"returned by `vectorize`, return a list of 3-tuples describing the\n"
-"ranges of character types found.  Each returned tuple comprises\n"
-"start and limit indexes into the input sequence describing the\n"
-"characteristics all symbols in the range share.\n");
+"Given a bytes-like object of Base64 alphabet symbol indexes such as\n"
+"returned by `vectorize` with `pad_with=64`, return a list of 3-tuples\n"
+"describing the ranges of character types found.  Each returned tuple\n"
+"comprises start and limit indexes into the input sequence and a mask\n"
+"describing the characteristics all symbols in the range share.\n");
 
 static PyObject *
 vec64_split(PyObject *self, PyObject *args)
@@ -329,7 +345,7 @@ error:
 static PyMethodDef vec64_methods[] = {
     {"vectorize",
      vectorize,
-     METH_VARARGS,
+     METH_VARARGS | METH_KEYWORDS,
      vectorize__doc__},
     {"_split",
      vec64_split,
