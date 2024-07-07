@@ -9,9 +9,13 @@ def base64_symbol_indexes(
         s: bytes | bytearray | str,
         *,
         errors: str = "replace",
+        align: bool = False,
         pad_with: int = 64,
 ) -> bytes:
-    kwargs = {"pad_with": pad_with}
+    kwargs = {
+        "align": align,
+        "pad_with": pad_with,
+    }
     try:
         return vectorize(s, **kwargs)
     except UnicodeEncodeError:

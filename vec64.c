@@ -35,6 +35,7 @@ PyDoc_STRVAR(vectorize__doc__,
 
 static char *vectorize_keywords[] = {
     "s",
+    "align",
     "pad_with",
     NULL,
 };
@@ -65,13 +66,15 @@ vectorize(PyObject *self, PyObject *args, PyObject *kwargs)
     const char *encoding = NULL;
     char *str = NULL;
     Py_ssize_t size;
+    int align_result = true;
     unsigned char pad_with = 0;
 
     if (!PyArg_ParseTupleAndKeywords(
             args, kwargs,
-            "et#|$b",
+            "et#|$pb",
             vectorize_keywords,
             encoding, &str, &size,
+            &align_result,
             &pad_with)) {
         return NULL;
     }
@@ -84,7 +87,7 @@ vectorize(PyObject *self, PyObject *args, PyObject *kwargs)
 
         if (unlikely((i & ~63) != 0)) {
             // Process up to two padding characters
-            if (c == '=') {
+            if (c == '=' && !align_result) {
                 *(p++) = pad_with;
 
                 // PyArg_ParseTuple* returns a NUL-terminated buffer for
@@ -100,6 +103,29 @@ vectorize(PyObject *self, PyObject *args, PyObject *kwargs)
         }
 
         *p = i;
+    }
+
+    if (align_result) {
+        const Py_ssize_t alignment = 4;  // must be a power of 2
+        const Py_ssize_t mask = alignment - 1;
+        Py_ssize_t aligned_size = (size + mask) & ~mask;
+
+        PySys_WriteStderr("size = %ld\n", size);
+        PySys_WriteStderr("aligned_size = %ld\n", aligned_size);
+        PySys_WriteStderr("str = %p\n", str);
+
+        if (aligned_size != size) {
+            char *orig_str = str;
+
+            str = PyMem_Realloc(orig_str, aligned_size);
+            if (unlikely(str == NULL)) {
+                PyMem_Free(orig_str);
+                return NULL;
+            }
+            PySys_WriteStderr("str = %p\n", str);
+            memset(str + size, aligned_size - size, pad_with);
+            size = aligned_size;
+        }
     }
 
     PyObject *result = PyBytes_FromStringAndSize(str, size);
