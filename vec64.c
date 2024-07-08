@@ -93,6 +93,81 @@ base64_symbol_indexes(PyObject *self, PyObject *args)
     return result;
 }
 
+PyDoc_STRVAR(pair_encode__doc__,
+"Integer-encode index pairs from a sequence of Base64 symbol indexes.\n"
+"\n"
+"Given a bytes-like object of Base64 alphabet symbol indexes `s` as\n"
+"returned by `base64_symbol_indexes`, return a tuple of `len(s) // 2`\n"
+"integers encoding the non-overlapping pairs of symbols in `s`.  The\n"
+"encoded values are calculated by left-shifting the value of the second\n"
+"symbol of each pair by six bits and then bitwise-ORing the result with\n"
+"the value of the first symbol in the pair.  The algorithm is roughly\n"
+"equivalent to:\n"
+"\n"
+"```python\n"
+"def pair_encode(s):\n"
+"    return tuple((s[i + 1] << 6) | s[i] for i in range(0, len(s), 2))\n"
+"```\n");
+
+static char *pair_encode_keywords[] = {
+    "s",
+    "start",
+    "limit",
+    NULL,
+};
+
+static PyObject *
+pair_encode(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    const char *symbols;
+    Py_ssize_t num_symbols, start = 0, limit = -1;
+
+    if (!PyArg_ParseTupleAndKeywords(
+            args, kwargs,
+            "y#|$nn",
+            pair_encode_keywords,
+
+            &symbols, &num_symbols, &start, &limit)) {
+        return NULL;
+    }
+
+    if (limit < 0) {
+        limit = num_symbols;
+    }
+
+    if (start < 0 || limit > num_symbols || start > limit) {
+        PyErr_SetNone(PyExc_IndexError);
+        return NULL;
+    }
+
+    Py_ssize_t num_pairs = (limit - start) / 2;
+    PyObject *result = PyTuple_New(num_pairs);
+    if (result == NULL) {
+        return NULL;
+    }
+
+    unsigned char *p = (unsigned char *) symbols + start;
+
+    for (int i = 0; i < num_pairs; i++) {
+        unsigned int ls6 = *(p++);
+        unsigned int ms6 = *(p++);
+        unsigned int code = (ms6 << 6) | ls6;
+
+        PyObject *v = PyLong_FromUnsignedLong(code);
+        if (unlikely(v == NULL)) {
+            goto error;
+        }
+
+        PyTuple_SET_ITEM(result, i, v);
+    }
+
+    return result;
+
+error:
+    Py_DECREF(result);
+    return NULL;
+}
+
 // Symbol and range types.  A bitmask of symbol characteristics, with
 // individual symbol type values chosen such that the overall type of
 // a group of symbols can be calculated by combining their individual
@@ -332,6 +407,10 @@ static PyMethodDef vec64_methods[] = {
      base64_symbol_indexes,
      METH_VARARGS,
      base64_symbol_indexes__doc__},
+    {"pair_encode",
+     pair_encode,
+     METH_VARARGS | METH_KEYWORDS,
+     pair_encode__doc__},
     {"_split",
      vec64_split,
      METH_VARARGS,
