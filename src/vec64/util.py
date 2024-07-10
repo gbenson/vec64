@@ -1,8 +1,17 @@
 from collections.abc import Iterable
 
 
+ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
+
+
+def unvectorize(s: bytes) -> str:
+    """The inverse function of `vectorize()`.
+    """
+    return "".join(ALPHABET[c] for c in s)
+
+
 def pair_decode(pairs: Iterable[int]) -> bytes:
-    """The inverse of `pair_encode()`.
+    """The inverse function of `pair_encode()`.
     """
     return b"".join(
         (b"@@"
