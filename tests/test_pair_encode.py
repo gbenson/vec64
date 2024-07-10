@@ -6,9 +6,9 @@ from itertools import pairwise
 import pytest
 
 from vec64 import (
-    base64_symbol_indexes as vectorize,
     pair_encode,
     pair_decode,
+    vectorize,
 )
 
 

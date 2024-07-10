@@ -4,6 +4,8 @@ from .span import Span
 from .util import pair_decode
 from .wrappers import base64_symbol_indexes, split
 
+vectorize = base64_symbol_indexes
+
 __all__ = [
     "CharType",
     "Span",
@@ -11,4 +13,5 @@ __all__ = [
     "pair_decode",
     "pair_encode",
     "split",
+    "vectorize",
 ]
